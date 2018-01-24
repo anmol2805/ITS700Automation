@@ -8,8 +8,10 @@ import android.text.TextUtils;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.Switch;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -21,9 +23,12 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -34,7 +39,10 @@ public class MainActivity extends AppCompatActivity {
     Button btnLogin,btnReset;
     String sid,email,password;
     private static long back_pressed;
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
+    Switch rc,ac,en;
     String crypt = "https://us-central1-iiitcloud-e9d6b.cloudfunctions.net/cryptr?pass=";
+    Boolean autoconnect = false,remainconnect = false,enablenotif = false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,11 +53,50 @@ public class MainActivity extends AppCompatActivity {
         progressBar = (ProgressBar) findViewById(R.id.prgbr);
         progressBar.setVisibility(View.GONE);
         btnLogin = (Button) findViewById(R.id.save);
-
+        rc = (Switch)findViewById(R.id.remainconnected);
+        ac = (Switch)findViewById(R.id.autoconnect);
+        en = (Switch)findViewById(R.id.enblenotif);
+        rc.setChecked(false);
+        ac.setChecked(false);
+        en.setChecked(false);
+        rc.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                if(b){
+                    remainconnect = true;
+                }
+                else{
+                    remainconnect = false;
+                }
+            }
+        });
+        ac.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                if(b){
+                    autoconnect = true;
+                }
+                else{
+                    autoconnect = false;
+                }
+            }
+        });
+        en.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                if(b){
+                    enablenotif = true;
+                }
+                else{
+                    enablenotif = false;
+                }
+            }
+        });
         btnLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 sid = inputEmail.getText().toString();
+                sid = sid.toLowerCase();
                 email = sid + "@iiit-bh.ac.in";
                 password = inputPassword.getText().toString();
 
@@ -96,7 +143,14 @@ public class MainActivity extends AppCompatActivity {
                                                                 StringRequest str = new StringRequest(Request.Method.POST, crypt + encode, new Response.Listener<String>() {
                                                                     @Override
                                                                     public void onResponse(String response) {
-
+                                                                        Map<String,Object> map = new HashMap<>();
+                                                                        map.put("sid",sid);
+                                                                        map.put("pass",response);
+                                                                        map.put("enablenotif",enablenotif);
+                                                                        map.put("remainconnect",remainconnect);
+                                                                        map.put("autoconnect",autoconnect);
+                                                                        db.collection("users").document(auth.getCurrentUser().getUid())
+                                                                                .set(map);
 
                                                                     }
                                                                 }, new Response.ErrorListener() {
@@ -132,6 +186,14 @@ public class MainActivity extends AppCompatActivity {
                                         StringRequest str = new StringRequest(Request.Method.POST, crypt + encode, new Response.Listener<String>() {
                                             @Override
                                             public void onResponse(String response) {
+                                                Map<String,Object> map = new HashMap<>();
+                                                map.put("sid",sid);
+                                                map.put("pass",response);
+                                                map.put("enablenotif",enablenotif);
+                                                map.put("remainconnect",remainconnect);
+                                                map.put("autoconnect",autoconnect);
+                                                db.collection("users").document(auth.getCurrentUser().getUid())
+                                                        .set(map);
 
                                             }
                                         }, new Response.ErrorListener() {
