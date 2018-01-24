@@ -4,6 +4,7 @@ import android.app.Application;
 
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 /**
  * Created by anmol on 2018-01-24.

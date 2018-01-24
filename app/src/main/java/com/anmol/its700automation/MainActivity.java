@@ -18,6 +18,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 
@@ -39,11 +40,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-
         inputEmail = (EditText) findViewById(R.id.userid);
         inputPassword = (EditText) findViewById(R.id.passwd);
         progressBar = (ProgressBar) findViewById(R.id.prgbr);
-
+        progressBar.setVisibility(View.GONE);
         btnLogin = (Button) findViewById(R.id.save);
 
         btnLogin.setOnClickListener(new View.OnClickListener() {
