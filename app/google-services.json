@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "96217831150",
+    "firebase_url": "https://its700automation.firebaseio.com",
+    "project_id": "its700automation",
+    "storage_bucket": "its700automation.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:96217831150:android:b230f8eea1332c8b",
+        "android_client_info": {
+          "package_name": "com.anmol.its700automation"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "96217831150-gr9fra00hrua8s2jmaceo1tektfmb5lv.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.anmol.its700automation",
+            "certificate_hash": "34b96318831da91a55cfc5aec7fc8ca64a04c83c"
+          }
+        },
+        {
+          "client_id": "96217831150-a27s51nut5t8i6fhp6niithqt6cmudo9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDpRz9OIXcqtdP6gy14Bm4nG39PP0F-Bek"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "96217831150-a27s51nut5t8i6fhp6niithqt6cmudo9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
