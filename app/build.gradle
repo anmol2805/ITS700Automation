@@ -5,7 +5,7 @@ android {
     buildToolsVersion "27.0.2"
     defaultConfig {
         applicationId "com.anmol.its700automation"
-        minSdkVersion 15
+        minSdkVersion 21
         targetSdkVersion 27
         versionCode 1
         versionName "1.0"
