@@ -8,6 +8,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.Toast;
 
+import com.anmol.its700automation.Services.ConnectivityService;
+import com.firebase.jobdispatcher.Constraint;
+import com.firebase.jobdispatcher.FirebaseJobDispatcher;
+import com.firebase.jobdispatcher.GooglePlayDriver;
+import com.firebase.jobdispatcher.Job;
+import com.firebase.jobdispatcher.Lifetime;
+import com.firebase.jobdispatcher.Trigger;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.FirebaseApp;
@@ -18,6 +25,7 @@ import java.util.Map;
 
 public class HomeActivity extends AppCompatActivity {
     FirebaseAuth auth = FirebaseAuth.getInstance();
+    private static final String jobtag = "tag";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -28,11 +36,21 @@ public class HomeActivity extends AppCompatActivity {
             startActivity(intent);
             finish();
         }
-        else if(!auth.getCurrentUser().isEmailVerified()){
-            showalert();
-        }
+//        else if(!auth.getCurrentUser().isEmailVerified()){
+//            showalert();
+//        }
         else {
             setContentView(R.layout.activity_home);
+            FirebaseJobDispatcher dispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(HomeActivity.this));
+            Job job = dispatcher.newJobBuilder()
+                    .setService(ConnectivityService.class)
+                    .setLifetime(Lifetime.FOREVER)
+                    .setRecurring(true)
+                    .setTag(jobtag)
+                    .setReplaceCurrent(false)
+                    .setConstraints(Constraint.ON_UNMETERED_NETWORK)
+                    .build();
+            dispatcher.mustSchedule(job);
         }
     }
 
