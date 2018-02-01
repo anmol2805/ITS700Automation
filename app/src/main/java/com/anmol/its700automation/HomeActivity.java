@@ -45,7 +45,6 @@ public class HomeActivity extends AppCompatActivity {
             Job job = dispatcher.newJobBuilder()
                     .setService(ConnectivityService.class)
                     .setLifetime(Lifetime.FOREVER)
-
                     .setTag(jobtag)
                     .setReplaceCurrent(true)
                     .setConstraints(Constraint.ON_UNMETERED_NETWORK)
