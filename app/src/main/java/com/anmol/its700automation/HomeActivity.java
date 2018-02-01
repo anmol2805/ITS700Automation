@@ -3,12 +3,14 @@ package com.anmol.its700automation;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.Toast;
 
 import com.anmol.its700automation.Services.ConnectivityService;
+import com.anmol.its700automation.Services.ForegroundService;
 import com.firebase.jobdispatcher.Constraint;
 import com.firebase.jobdispatcher.FirebaseJobDispatcher;
 import com.firebase.jobdispatcher.GooglePlayDriver;
@@ -41,15 +43,23 @@ public class HomeActivity extends AppCompatActivity {
 //        }
         else {
             setContentView(R.layout.activity_home);
-            FirebaseJobDispatcher dispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(HomeActivity.this));
-            Job job = dispatcher.newJobBuilder()
-                    .setService(ConnectivityService.class)
-                    .setLifetime(Lifetime.FOREVER)
-                    .setTag(jobtag)
-                    .setReplaceCurrent(true)
-                    .setConstraints(Constraint.ON_UNMETERED_NETWORK)
-                    .build();
-            dispatcher.mustSchedule(job);
+            Intent intent = new Intent(getApplicationContext(),ForegroundService.class);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                startForegroundService(intent);
+            }
+            else {
+                startService(intent);
+            }
+
+//            FirebaseJobDispatcher dispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(HomeActivity.this));
+//            Job job = dispatcher.newJobBuilder()
+//                    .setService(ConnectivityService.class)
+//                    .setLifetime(Lifetime.FOREVER)
+//                    .setTag(jobtag)
+//                    .setReplaceCurrent(true)
+//                    .setConstraints(Constraint.ON_UNMETERED_NETWORK)
+//                    .build();
+//            dispatcher.mustSchedule(job);
         }
     }
 
