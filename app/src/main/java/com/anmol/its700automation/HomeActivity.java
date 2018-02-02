@@ -57,7 +57,7 @@ public class HomeActivity extends AppCompatActivity {
 //                    .setLifetime(Lifetime.FOREVER)
 //                    .setTag(jobtag)
 //                    .setReplaceCurrent(true)
-//                    .setConstraints(Constraint.ON_UNMETERED_NETWORK)
+//                    .setConstraints(Constraint.ON_ANY_NETWORK)
 //                    .build();
 //            dispatcher.mustSchedule(job);
         }
