@@ -21,6 +21,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.constraint.solver.widgets.ConstraintAnchor;
+import android.support.v4.app.NotificationCompat;
 
 import com.anmol.its700automation.HomeActivity;
 import com.anmol.its700automation.R;
@@ -32,13 +33,41 @@ import com.google.android.gms.drive.TransferPreferences;
 
 public class ForegroundService extends Service {
     public static int FOREGROUND_SERVICE = 101;
+    String id = "xyz";
+    String name = "xyz";
 
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
         return null;
     }
-
+//    @Override
+//    public int onStartCommand(Intent intent, int flags, int startId) {
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//            NotificationManager notificationManager = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
+//            createChannel(notificationManager);
+//            Notification.Builder builder = new Notification.Builder(this,id)
+//                    .setContentTitle("this is notification")
+//                    .setContentText("notification")
+//                    .setAutoCancel(true);
+//
+//            Notification notification = builder.build();
+//            startForeground(1, notification);
+//
+//        } else {
+//
+//            NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
+//                    .setContentTitle(getString(R.string.app_name))
+//                    .setContentText("notification")
+//                    .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+//                    .setAutoCancel(true);
+//
+//            Notification notification = builder.build();
+//
+//            startForeground(1, notification);
+//        }
+//        return START_STICKY;
+//    }
 
 
     @Override
@@ -50,17 +79,20 @@ public class ForegroundService extends Service {
         final PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0,
                 notificationIntent, 0);
         NotificationManager notificationManager = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) createChannel(notificationManager);
-        Notification notification = new Notification.Builder(getApplicationContext())
-                .setContentTitle("Canopy Developers")
-                .setContentText("ITS Automation")
-                .setSmallIcon(R.mipmap.ic_launcher)
-                .setContentIntent(pendingIntent)
-                .setOngoing(true)
-                .build();
-        startForeground(FOREGROUND_SERVICE,
-                notification);
-        notificationManager.notify(FOREGROUND_SERVICE,notification);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+            Notification notification = new Notification.Builder(getApplicationContext())
+                    .setChannelId(id)
+                    .setContentTitle("Canopy Developers")
+                    .setContentText("ITS Automation")
+                    .setSmallIcon(R.drawable.ic_media_pause_light)
+                    .setContentIntent(pendingIntent)
+                    .setOngoing(true)
+                    .build();
+            startForeground(FOREGROUND_SERVICE,notification);
+            //notificationManager.notify(FOREGROUND_SERVICE,notification);
+            createChannel(notificationManager);
+
+        }
 
 
 
@@ -68,12 +100,11 @@ public class ForegroundService extends Service {
     }
     @TargetApi(26)
     private void createChannel(NotificationManager notificationManager) {
-        String name = "FileDownload";
-        String description = "Notifications for download status";
+
         int importance = NotificationManager.IMPORTANCE_DEFAULT;
 
-        NotificationChannel mChannel = new NotificationChannel(name, name, importance);
-        mChannel.setDescription(description);
+        NotificationChannel mChannel = new NotificationChannel(id,name,importance);
+        //mChannel.setDescription(description);
         mChannel.enableLights(true);
         mChannel.setLightColor(Color.BLUE);
         notificationManager.createNotificationChannel(mChannel);
