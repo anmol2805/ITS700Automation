@@ -84,7 +84,7 @@ public class ForegroundService extends Service {
                     .setChannelId(id)
                     .setContentTitle("Canopy Developers")
                     .setContentText("ITS Automation")
-                    .setSmallIcon(R.drawable.ic_media_pause_light)
+                    .setSmallIcon(R.drawable.ic_launcher_foreground)
                     .setContentIntent(pendingIntent)
                     .setOngoing(true)
                     .build();
@@ -92,6 +92,16 @@ public class ForegroundService extends Service {
             //notificationManager.notify(FOREGROUND_SERVICE,notification);
             createChannel(notificationManager);
 
+        }
+        else{
+            Notification notification = new Notification.Builder(getApplicationContext())
+                    .setContentTitle("Canopy Developers")
+                    .setContentText("ITS Automation")
+                    .setSmallIcon(R.drawable.ic_launcher_background)
+                    .setContentIntent(pendingIntent)
+                    .setOngoing(true)
+                    .build();
+            startForeground(FOREGROUND_SERVICE,notification);
         }
 
 
