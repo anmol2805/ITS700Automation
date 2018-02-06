@@ -1,6 +1,7 @@
 package com.anmol.its700automation;
 
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -25,7 +26,11 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
@@ -95,6 +100,7 @@ public class MainActivity extends AppCompatActivity {
         btnLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
                 sid = inputEmail.getText().toString();
                 sid = sid.toLowerCase();
                 email = sid + "@iiit-bh.ac.in";
@@ -237,6 +243,28 @@ public class MainActivity extends AppCompatActivity {
         }else {
             Toast.makeText(getBaseContext(), "Press once again to exit!", Toast.LENGTH_SHORT).show();
             back_pressed = System.currentTimeMillis();
+        }
+    }
+    public static class Itsrequest extends AsyncTask<Void, Void, URL> {
+
+        @Override
+        protected URL doInBackground(Void... voids) {
+            URLConnection con = null;
+            try {
+                con = new URL( "http://14.139.198.171/api/hibi" ).openConnection();
+                System.out.println( "orignal url: " + con.getURL() );
+                con.connect();
+                System.out.println( "connected url: " + con.getURL() );
+                InputStream is = con.getInputStream();
+                System.out.println( "redirected url: " + con.getURL() );
+                is.close();
+                return con.getURL();
+            } catch (IOException e) {
+                e.printStackTrace();
+
+
+            }
+            return null;
         }
     }
 }
