@@ -24,6 +24,7 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
+import com.google.android.gms.maps.StreetViewPanoramaFragment;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.FirebaseApp;
@@ -34,6 +35,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
@@ -54,6 +56,8 @@ public class MainActivity extends AppCompatActivity {
     String crypt = "https://us-central1-iiitcloud-e9d6b.cloudfunctions.net/cryptr?pass=";
     Boolean autoconnect = false,remainconnect = false,enablenotif = false;
     Logout logout;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -119,6 +123,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 if(isWifiConnected()){
+                    logout.execute();
 
                 }
                 else{
@@ -327,6 +332,28 @@ public class MainActivity extends AppCompatActivity {
             networkstatus = false;
         }
         return networkstatus;
+    }
+    public Boolean isMagicTokenAccessible(){
+        final Boolean[] tokenstatus = {false};
+        Itsrequest itsrequest = new Itsrequest(){
+            @Override
+            protected void onPostExecute(URL url) {
+                super.onPostExecute(url);
+                String reurl = String.valueOf(url);
+                if(reurl.contains("http://14.139.198.171/api/hibi")){
+                    Toast.makeText(MainActivity.this,"Please connect to ITS network",Toast.LENGTH_LONG).show();
+                    tokenstatus[0] = false;
+                }
+                else{
+                    String magictoken = reurl.substring(reurl.lastIndexOf("?")+1);
+                    tokenstatus[0] = true;
+                }
+
+
+            }
+        };
+        itsrequest.execute();
+        return tokenstatus[0];
     }
 
 
