@@ -56,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
     String crypt = "https://us-central1-iiitcloud-e9d6b.cloudfunctions.net/cryptr?pass=";
     Boolean autoconnect = false,remainconnect = false,enablenotif = false;
     Logout logout;
-
+    String magictoken = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -124,10 +124,13 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 if(isWifiConnected()){
                     logout.execute();
+                    if(isMagicTokenAccessible()){
+
+                    }
 
                 }
                 else{
-                    Toast.makeText(MainActivity.this,"Please connect to Wifi!!!",Toast.LENGTH_LONG).show();
+                    Toast.makeText(MainActivity.this,"Please connect to ITS!!!",Toast.LENGTH_LONG).show();
                 }
                 sid = inputEmail.getText().toString();
                 sid = sid.toLowerCase();
@@ -341,11 +344,13 @@ public class MainActivity extends AppCompatActivity {
                 super.onPostExecute(url);
                 String reurl = String.valueOf(url);
                 if(reurl.contains("http://14.139.198.171/api/hibi")){
+                    logout.execute();
                     Toast.makeText(MainActivity.this,"Please connect to ITS network",Toast.LENGTH_LONG).show();
                     tokenstatus[0] = false;
                 }
                 else{
-                    String magictoken = reurl.substring(reurl.lastIndexOf("?")+1);
+                    magictoken = reurl.substring(reurl.lastIndexOf("?")+1);
+
                     tokenstatus[0] = true;
                 }
 
