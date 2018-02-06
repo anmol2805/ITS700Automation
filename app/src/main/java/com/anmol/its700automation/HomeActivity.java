@@ -54,6 +54,7 @@ public class HomeActivity extends AppCompatActivity {
 //                e.printStackTrace();
 //            }
             request request = new request(){
+
                 @Override
                 protected void onPostExecute(URL url) {
                     super.onPostExecute(url);
