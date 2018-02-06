@@ -1,6 +1,8 @@
 package com.anmol.its700automation;
 
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -267,4 +269,23 @@ public class MainActivity extends AppCompatActivity {
             return null;
         }
     }
+
+
+    public Boolean isWifiConnected() {
+        Boolean networkstatus = false;
+        final ConnectivityManager connMgr = (ConnectivityManager)
+                this.getSystemService(Context.CONNECTIVITY_SERVICE);
+        final android.net.NetworkInfo wifi = connMgr.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+        final android.net.NetworkInfo mobile = connMgr.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
+        if (wifi.isConnectedOrConnecting ()) {
+            networkstatus = true;
+        } else if (mobile.isConnectedOrConnecting ()) {
+            networkstatus = false;
+        } else {
+            networkstatus = false;
+        }
+        return networkstatus;
+    }
+
+
 }
