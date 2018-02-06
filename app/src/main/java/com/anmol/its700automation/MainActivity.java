@@ -3,6 +3,9 @@ package com.anmol.its700automation;
 import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
+import android.net.wifi.SupplicantState;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -50,6 +53,7 @@ public class MainActivity extends AppCompatActivity {
     Switch rc,ac,en;
     String crypt = "https://us-central1-iiitcloud-e9d6b.cloudfunctions.net/cryptr?pass=";
     Boolean autoconnect = false,remainconnect = false,enablenotif = false;
+    Logout logout;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -63,6 +67,18 @@ public class MainActivity extends AppCompatActivity {
         rc = (Switch)findViewById(R.id.remainconnected);
         ac = (Switch)findViewById(R.id.autoconnect);
         en = (Switch)findViewById(R.id.enblenotif);
+        if(!isWifiConnected()){
+            Toast.makeText(this,"Please connect to Wifi!!!",Toast.LENGTH_LONG).show();
+        }
+        logout = new Logout(){
+            @Override
+            protected void onPostExecute(URL url) {
+                super.onPostExecute(url);
+                String reurl = String.valueOf(url);
+
+            }
+        };
+        logout.execute();
         rc.setChecked(false);
         ac.setChecked(false);
         en.setChecked(false);
@@ -102,7 +118,12 @@ public class MainActivity extends AppCompatActivity {
         btnLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if(isWifiConnected()){
 
+                }
+                else{
+                    Toast.makeText(MainActivity.this,"Please connect to Wifi!!!",Toast.LENGTH_LONG).show();
+                }
                 sid = inputEmail.getText().toString();
                 sid = sid.toLowerCase();
                 email = sid + "@iiit-bh.ac.in";
@@ -269,6 +290,27 @@ public class MainActivity extends AppCompatActivity {
             return null;
         }
     }
+    public static class Logout extends AsyncTask<Void,Void,URL>{
+        @Override
+        protected URL doInBackground(Void... voids) {
+            URLConnection con = null;
+            try {
+                con = new URL( "http://172.16.1.11:1000/logout?060b0a0200050d26" ).openConnection();
+                System.out.println( "orignal url: " + con.getURL() );
+                con.connect();
+                System.out.println( "connected url: " + con.getURL() );
+                InputStream is = con.getInputStream();
+                System.out.println( "redirected url: " + con.getURL() );
+                is.close();
+                return con.getURL();
+            } catch (IOException e) {
+                e.printStackTrace();
+
+
+            }
+            return null;
+        }
+    }
 
 
     public Boolean isWifiConnected() {
@@ -286,6 +328,7 @@ public class MainActivity extends AppCompatActivity {
         }
         return networkstatus;
     }
+
 
 
 }
