@@ -8,31 +8,23 @@ import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.widget.TextView;
 import android.widget.Toast;
 
-import com.anmol.its700automation.Services.ConnectivityService;
 import com.anmol.its700automation.Services.ForegroundService;
-import com.firebase.jobdispatcher.Constraint;
-import com.firebase.jobdispatcher.FirebaseJobDispatcher;
-import com.firebase.jobdispatcher.GooglePlayDriver;
-import com.firebase.jobdispatcher.Job;
-import com.firebase.jobdispatcher.Lifetime;
-import com.firebase.jobdispatcher.Trigger;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.HashMap;
-import java.util.Map;
 
 public class HomeActivity extends AppCompatActivity {
     FirebaseAuth auth = FirebaseAuth.getInstance();
     private static final String jobtag = "tag";
+    TextView textView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,6 +40,7 @@ public class HomeActivity extends AppCompatActivity {
 //        }
         else {
             setContentView(R.layout.activity_home);
+            textView = (TextView)findViewById(R.id.textView);
 //            URLConnection con = null;
 //            try {
 //                con = new URL( "http://14.139.198.171/api/hibi" ).openConnection();
@@ -60,7 +53,15 @@ public class HomeActivity extends AppCompatActivity {
 //            } catch (IOException e) {
 //                e.printStackTrace();
 //            }
-            new request().execute();
+            request request = new request(){
+                @Override
+                protected void onPostExecute(URL url) {
+                    super.onPostExecute(url);
+                    String reurl = String.valueOf(url);
+                    textView.setText(reurl);
+                }
+            };
+            request.execute();
             Intent intent = new Intent(getApplicationContext(),ForegroundService.class);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 startForegroundService(intent);
@@ -119,10 +120,10 @@ public class HomeActivity extends AppCompatActivity {
             }
         });
     }
-    public class request extends AsyncTask<Void,Void,Void>{
+    public static class request extends AsyncTask<Void, Void, URL> {
 
         @Override
-        protected Void doInBackground(Void... voids) {
+        protected URL doInBackground(Void... voids) {
             URLConnection con = null;
             try {
                 con = new URL( "http://14.139.198.171/api/hibi" ).openConnection();
@@ -132,6 +133,7 @@ public class HomeActivity extends AppCompatActivity {
                 InputStream is = con.getInputStream();
                 System.out.println( "redirected url: " + con.getURL() );
                 is.close();
+                return con.getURL();
             } catch (IOException e) {
                 e.printStackTrace();
 
