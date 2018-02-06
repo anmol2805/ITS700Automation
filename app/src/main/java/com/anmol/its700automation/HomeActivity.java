@@ -3,6 +3,7 @@ package com.anmol.its700automation;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -22,6 +23,10 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -43,6 +48,19 @@ public class HomeActivity extends AppCompatActivity {
 //        }
         else {
             setContentView(R.layout.activity_home);
+//            URLConnection con = null;
+//            try {
+//                con = new URL( "http://14.139.198.171/api/hibi" ).openConnection();
+//                System.out.println( "orignal url: " + con.getURL() );
+//                con.connect();
+//                System.out.println( "connected url: " + con.getURL() );
+//                InputStream is = con.getInputStream();
+//                System.out.println( "redirected url: " + con.getURL() );
+//                is.close();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+            new request().execute();
             Intent intent = new Intent(getApplicationContext(),ForegroundService.class);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 startForegroundService(intent);
@@ -101,6 +119,27 @@ public class HomeActivity extends AppCompatActivity {
             }
         });
     }
+    public class request extends AsyncTask<Void,Void,Void>{
 
+        @Override
+        protected Void doInBackground(Void... voids) {
+            URLConnection con = null;
+            try {
+                con = new URL( "http://14.139.198.171/api/hibi" ).openConnection();
+                System.out.println( "orignal url: " + con.getURL() );
+                con.connect();
+                System.out.println( "connected url: " + con.getURL() );
+                InputStream is = con.getInputStream();
+                System.out.println( "redirected url: " + con.getURL() );
+                is.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+
+
+            }
+            return null;
+        }
+    }
 
 }
+
