@@ -60,8 +60,8 @@ public class MainActivity extends AppCompatActivity {
     Switch rc,ac,en;
     String crypt = "https://us-central1-iiitcloud-e9d6b.cloudfunctions.net/cryptr?pass=";
     Boolean autoconnect = false,remainconnect = false,enablenotif = false;
-    Logout logout;
-    String magictoken = null;
+    Logout logout,logout2,logout3;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -128,168 +128,10 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 if(isWifiConnected()){
-                    logout.execute();
-                    if(isMagicTokenAccessible()){
+                    logout2 = new Logout();
+                    logout2.execute();
+                    magictokenrequest();
 
-                        sid = inputEmail.getText().toString();
-                        sid = sid.toLowerCase();
-                        email = sid + "@iiit-bh.ac.in";
-                        password = inputPassword.getText().toString();
-
-                        if (TextUtils.isEmpty(email)) {
-                            Toast.makeText(getApplicationContext(), "Enter login ID!", Toast.LENGTH_SHORT).show();
-                            return;
-                        }
-
-                        if (TextUtils.isEmpty(password)) {
-                            Toast.makeText(getApplicationContext(), "Enter password!", Toast.LENGTH_SHORT).show();
-                            return;
-                        }
-                        JSONObject jsonObject = new JSONObject();
-                        try {
-                            jsonObject.put("magic",magictoken);
-                            jsonObject.put("username",sid.toUpperCase());
-                            jsonObject.put("password",password);
-                            jsonObject.put("4Tredir","testing");
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, "http://172.16.1.11:1000/", jsonObject, new Response.Listener<JSONObject>() {
-                            @Override
-                            public void onResponse(JSONObject response) {
-                                
-                            }
-                        }, new Response.ErrorListener() {
-                            @Override
-                            public void onErrorResponse(VolleyError error) {
-
-                            }
-                        }){
-                            @Override
-                            public Map<String, String> getHeaders() throws AuthFailureError {
-                                Map<String, String> params = new HashMap<String, String>();
-                                params.put("cache-control", "no-cache");
-                                params.put("content-type", "application/x-www-form-urlencoded");
-
-                                return params;
-                            }
-                        };
-                        Mysingleton.getInstance(MainActivity.this).addToRequestqueue(jsonObjectRequest);
-                        progressBar.setVisibility(View.VISIBLE);
-                        auth.signInWithEmailAndPassword(email, password)
-                                .addOnCompleteListener(MainActivity.this, new OnCompleteListener<AuthResult>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<AuthResult> task) {
-                                        // If sign in fails, display a message to the user. If sign in succeeds
-                                        // the auth state listener will be notified and logic to handle the
-                                        // signed in user can be handled in the listener.
-                                        progressBar.setVisibility(View.INVISIBLE);
-                                        if (!task.isSuccessful()) {
-                                            // there was an error
-                                            if (password.length() < 6) {
-                                                //inputPassword.setError(getString(R.string.minimum_password));
-                                            } else {
-
-                                                auth.createUserWithEmailAndPassword(email, password)
-                                                        .addOnCompleteListener(MainActivity.this, new OnCompleteListener<AuthResult>() {
-                                                            @Override
-                                                            public void onComplete(@NonNull Task<AuthResult> task) {
-
-                                                                progressBar.setVisibility(View.INVISIBLE);
-                                                                // If sign in fails, display a message to the user. If sign in succeeds
-                                                                // the auth state listener will be notified and logic to handle the
-                                                                // signed in user can be handled in the listener.
-                                                                if (!task.isSuccessful()) {
-                                                                    Toast.makeText(MainActivity.this, "Authentication failed.Check your Network Connection",
-                                                                            Toast.LENGTH_SHORT).show();
-                                                                } else {
-
-                                                                    try {
-                                                                        String encode  = URLEncoder.encode(password,"UTF-8");
-                                                                        StringRequest str = new StringRequest(Request.Method.POST, crypt + encode, new Response.Listener<String>() {
-                                                                            @Override
-                                                                            public void onResponse(String response) {
-                                                                                Map<String,Object> map = new HashMap<>();
-                                                                                map.put("sid",sid);
-                                                                                map.put("pass",response);
-                                                                                map.put("enablenotif",enablenotif);
-                                                                                map.put("remainconnect",remainconnect);
-                                                                                map.put("autoconnect",autoconnect);
-                                                                                db.collection("users").document(auth.getCurrentUser().getUid())
-                                                                                        .set(map);
-
-                                                                            }
-                                                                        }, new Response.ErrorListener() {
-                                                                            @Override
-                                                                            public void onErrorResponse(VolleyError error) {
-
-                                                                            }
-                                                                        });
-                                                                        Mysingleton.getInstance(MainActivity.this).addToRequestqueue(str);
-
-                                                                    } catch (UnsupportedEncodingException e) {
-                                                                        e.printStackTrace();
-                                                                    }
-
-
-                                                                    Intent intent = new Intent(MainActivity.this, HomeActivity.class);
-
-                                                                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                                                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                                                    startActivity(intent);
-                                                                    finish();
-                                                                    //overridePendingTransition(R.anim.still,R.anim.slide_in_up);
-                                                                }
-                                                            }
-                                                        });
-                                            }
-                                        } else {
-
-
-                                            try {
-                                                String encode = URLEncoder.encode(password,"UTF-8");
-
-                                                StringRequest str = new StringRequest(Request.Method.POST, crypt + encode, new Response.Listener<String>() {
-                                                    @Override
-                                                    public void onResponse(String response) {
-                                                        Map<String,Object> map = new HashMap<>();
-                                                        map.put("sid",sid);
-                                                        map.put("pass",response);
-                                                        map.put("enablenotif",enablenotif);
-                                                        map.put("remainconnect",remainconnect);
-                                                        map.put("autoconnect",autoconnect);
-                                                        db.collection("users").document(auth.getCurrentUser().getUid())
-                                                                .set(map);
-
-                                                    }
-                                                }, new Response.ErrorListener() {
-                                                    @Override
-                                                    public void onErrorResponse(VolleyError error) {
-
-                                                    }
-                                                });
-                                                Mysingleton.getInstance(MainActivity.this).addToRequestqueue(str);
-                                            } catch (UnsupportedEncodingException e) {
-                                                e.printStackTrace();
-                                            }
-
-
-
-                                            Intent intent = new Intent(MainActivity.this, HomeActivity.class);
-
-                                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                            startActivity(intent);
-                                            finish();
-                                            //overridePendingTransition(R.anim.still,R.anim.slide_in_up);
-
-
-
-
-                                        }
-                                    }
-                                });
-                    }
 
                 }
                 else{
@@ -301,6 +143,192 @@ public class MainActivity extends AppCompatActivity {
 
 
     }
+
+    private void magictokenrequest() {
+        Itsrequest itsrequest = new Itsrequest(){
+            @Override
+            protected void onPostExecute(URL url) {
+                super.onPostExecute(url);
+                String reurl = String.valueOf(url);
+                if(reurl.contains("http://14.139.198.171/api/hibi")){
+                    logout3 = new Logout();
+                    logout3.execute();
+                    Toast.makeText(MainActivity.this,"Please connect to ITS network",Toast.LENGTH_LONG).show();
+                }
+                else{
+                    String magictoken = reurl.substring(reurl.lastIndexOf("?")+1);
+                    loginrequest(magictoken);
+                }
+
+
+            }
+        };
+        itsrequest.execute();
+    }
+
+    private void loginrequest(final String magictoken) {
+        sid = inputEmail.getText().toString();
+        sid = sid.toLowerCase();
+        email = sid + "@iiit-bh.ac.in";
+        password = inputPassword.getText().toString();
+
+        if (TextUtils.isEmpty(email)) {
+            Toast.makeText(getApplicationContext(), "Enter login ID!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (TextUtils.isEmpty(password)) {
+            Toast.makeText(getApplicationContext(), "Enter password!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("magic",magictoken);
+            jsonObject.put("username",sid.toUpperCase());
+            jsonObject.put("password",password);
+            jsonObject.put("4Tredir","testing");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, "http://172.16.1.11:1000/", jsonObject, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Toast.makeText(MainActivity.this,magictoken,Toast.LENGTH_SHORT).show();
+            }
+        }){
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("cache-control", "no-cache");
+                params.put("content-type", "application/x-www-form-urlencoded");
+
+                return params;
+            }
+        };
+        Mysingleton.getInstance(MainActivity.this).addToRequestqueue(jsonObjectRequest);
+//                        progressBar.setVisibility(View.VISIBLE);
+//                        auth.signInWithEmailAndPassword(email, password)
+//                                .addOnCompleteListener(MainActivity.this, new OnCompleteListener<AuthResult>() {
+//                                    @Override
+//                                    public void onComplete(@NonNull Task<AuthResult> task) {
+//                                        // If sign in fails, display a message to the user. If sign in succeeds
+//                                        // the auth state listener will be notified and logic to handle the
+//                                        // signed in user can be handled in the listener.
+//                                        progressBar.setVisibility(View.INVISIBLE);
+//                                        if (!task.isSuccessful()) {
+//                                            // there was an error
+//                                            if (password.length() < 6) {
+//                                                //inputPassword.setError(getString(R.string.minimum_password));
+//                                            } else {
+//
+//                                                auth.createUserWithEmailAndPassword(email, password)
+//                                                        .addOnCompleteListener(MainActivity.this, new OnCompleteListener<AuthResult>() {
+//                                                            @Override
+//                                                            public void onComplete(@NonNull Task<AuthResult> task) {
+//
+//                                                                progressBar.setVisibility(View.INVISIBLE);
+//                                                                // If sign in fails, display a message to the user. If sign in succeeds
+//                                                                // the auth state listener will be notified and logic to handle the
+//                                                                // signed in user can be handled in the listener.
+//                                                                if (!task.isSuccessful()) {
+//                                                                    Toast.makeText(MainActivity.this, "Authentication failed.Check your Network Connection",
+//                                                                            Toast.LENGTH_SHORT).show();
+//                                                                } else {
+//
+//                                                                    try {
+//                                                                        String encode  = URLEncoder.encode(password,"UTF-8");
+//                                                                        StringRequest str = new StringRequest(Request.Method.POST, crypt + encode, new Response.Listener<String>() {
+//                                                                            @Override
+//                                                                            public void onResponse(String response) {
+//                                                                                Map<String,Object> map = new HashMap<>();
+//                                                                                map.put("sid",sid);
+//                                                                                map.put("pass",response);
+//                                                                                map.put("enablenotif",enablenotif);
+//                                                                                map.put("remainconnect",remainconnect);
+//                                                                                map.put("autoconnect",autoconnect);
+//                                                                                db.collection("users").document(auth.getCurrentUser().getUid())
+//                                                                                        .set(map);
+//
+//                                                                            }
+//                                                                        }, new Response.ErrorListener() {
+//                                                                            @Override
+//                                                                            public void onErrorResponse(VolleyError error) {
+//
+//                                                                            }
+//                                                                        });
+//                                                                        Mysingleton.getInstance(MainActivity.this).addToRequestqueue(str);
+//
+//                                                                    } catch (UnsupportedEncodingException e) {
+//                                                                        e.printStackTrace();
+//                                                                    }
+//
+//
+//                                                                    Intent intent = new Intent(MainActivity.this, HomeActivity.class);
+//
+//                                                                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//                                                                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+//                                                                    startActivity(intent);
+//                                                                    finish();
+//                                                                    //overridePendingTransition(R.anim.still,R.anim.slide_in_up);
+//                                                                }
+//                                                            }
+//                                                        });
+//                                            }
+//                                        } else {
+//
+//
+//                                            try {
+//                                                String encode = URLEncoder.encode(password,"UTF-8");
+//
+//                                                StringRequest str = new StringRequest(Request.Method.POST, crypt + encode, new Response.Listener<String>() {
+//                                                    @Override
+//                                                    public void onResponse(String response) {
+//                                                        Map<String,Object> map = new HashMap<>();
+//                                                        map.put("sid",sid);
+//                                                        map.put("pass",response);
+//                                                        map.put("enablenotif",enablenotif);
+//                                                        map.put("remainconnect",remainconnect);
+//                                                        map.put("autoconnect",autoconnect);
+//                                                        db.collection("users").document(auth.getCurrentUser().getUid())
+//                                                                .set(map);
+//
+//                                                    }
+//                                                }, new Response.ErrorListener() {
+//                                                    @Override
+//                                                    public void onErrorResponse(VolleyError error) {
+//
+//                                                    }
+//                                                });
+//                                                Mysingleton.getInstance(MainActivity.this).addToRequestqueue(str);
+//                                            } catch (UnsupportedEncodingException e) {
+//                                                e.printStackTrace();
+//                                            }
+//
+//
+//
+//                                            Intent intent = new Intent(MainActivity.this, HomeActivity.class);
+//
+//                                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//                                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+//                                            startActivity(intent);
+//                                            finish();
+//                                            //overridePendingTransition(R.anim.still,R.anim.slide_in_up);
+//
+//
+//
+//
+//                                        }
+//                                    }
+//                                });
+
+
+    }
+
     @Override
     public void onBackPressed() {
         if(back_pressed + 2000 > System.currentTimeMillis()) {
@@ -372,6 +400,7 @@ public class MainActivity extends AppCompatActivity {
         }
         return networkstatus;
     }
+
     public Boolean isMagicTokenAccessible(){
         final Boolean[] tokenstatus = {false};
         Itsrequest itsrequest = new Itsrequest(){
@@ -380,12 +409,13 @@ public class MainActivity extends AppCompatActivity {
                 super.onPostExecute(url);
                 String reurl = String.valueOf(url);
                 if(reurl.contains("http://14.139.198.171/api/hibi")){
-                    logout.execute();
+                    logout3 = new Logout();
+                    logout3.execute();
                     Toast.makeText(MainActivity.this,"Please connect to ITS network",Toast.LENGTH_LONG).show();
                     tokenstatus[0] = false;
                 }
                 else{
-                    magictoken = reurl.substring(reurl.lastIndexOf("?")+1);
+                    String magictoken = reurl.substring(reurl.lastIndexOf("?")+1);
 
                     tokenstatus[0] = true;
                 }
