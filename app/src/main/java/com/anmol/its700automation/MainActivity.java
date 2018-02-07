@@ -20,9 +20,11 @@ import android.widget.ProgressBar;
 import android.widget.Switch;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.google.android.gms.maps.StreetViewPanoramaFragment;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -31,6 +33,9 @@ import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -125,6 +130,7 @@ public class MainActivity extends AppCompatActivity {
                 if(isWifiConnected()){
                     logout.execute();
                     if(isMagicTokenAccessible()){
+
                         sid = inputEmail.getText().toString();
                         sid = sid.toLowerCase();
                         email = sid + "@iiit-bh.ac.in";
@@ -139,6 +145,36 @@ public class MainActivity extends AppCompatActivity {
                             Toast.makeText(getApplicationContext(), "Enter password!", Toast.LENGTH_SHORT).show();
                             return;
                         }
+                        JSONObject jsonObject = new JSONObject();
+                        try {
+                            jsonObject.put("magic",magictoken);
+                            jsonObject.put("username",sid.toUpperCase());
+                            jsonObject.put("password",password);
+                            jsonObject.put("4Tredir","testing");
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, "http://172.16.1.11:1000/", jsonObject, new Response.Listener<JSONObject>() {
+                            @Override
+                            public void onResponse(JSONObject response) {
+                                
+                            }
+                        }, new Response.ErrorListener() {
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+
+                            }
+                        }){
+                            @Override
+                            public Map<String, String> getHeaders() throws AuthFailureError {
+                                Map<String, String> params = new HashMap<String, String>();
+                                params.put("cache-control", "no-cache");
+                                params.put("content-type", "application/x-www-form-urlencoded");
+
+                                return params;
+                            }
+                        };
+                        Mysingleton.getInstance(MainActivity.this).addToRequestqueue(jsonObjectRequest);
                         progressBar.setVisibility(View.VISIBLE);
                         auth.signInWithEmailAndPassword(email, password)
                                 .addOnCompleteListener(MainActivity.this, new OnCompleteListener<AuthResult>() {
