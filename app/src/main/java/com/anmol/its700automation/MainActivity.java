@@ -168,6 +168,116 @@ public class MainActivity extends AppCompatActivity {
         };
         itsrequest.execute();
     }
+    private void firebaserequest(){
+        auth.signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener(MainActivity.this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        // If sign in fails, display a message to the user. If sign in succeeds
+                        // the auth state listener will be notified and logic to handle the
+                        // signed in user can be handled in the listener.
+                        progressBar.setVisibility(View.INVISIBLE);
+                        if (!task.isSuccessful()) {
+                            // there was an error
+                            if (password.length() < 6) {
+                                //inputPassword.setError(getString(R.string.minimum_password));
+                            } else {
+
+                                auth.createUserWithEmailAndPassword(email, password)
+                                        .addOnCompleteListener(MainActivity.this, new OnCompleteListener<AuthResult>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<AuthResult> task) {
+
+                                                progressBar.setVisibility(View.INVISIBLE);
+                                                // If sign in fails, display a message to the user. If sign in succeeds
+                                                // the auth state listener will be notified and logic to handle the
+                                                // signed in user can be handled in the listener.
+                                                if (!task.isSuccessful()) {
+                                                    Toast.makeText(MainActivity.this, "Authentication failed.Check your Network Connection",
+                                                            Toast.LENGTH_SHORT).show();
+                                                } else {
+
+                                                    try {
+                                                        String encode  = URLEncoder.encode(password,"UTF-8");
+                                                        StringRequest str = new StringRequest(Request.Method.POST, crypt + encode, new Response.Listener<String>() {
+                                                            @Override
+                                                            public void onResponse(String response) {
+                                                                Map<String,Object> map = new HashMap<>();
+                                                                map.put("sid",sid);
+                                                                map.put("pass",response);
+                                                                db.collection("users").document(auth.getCurrentUser().getUid())
+                                                                        .set(map);
+
+                                                            }
+                                                        }, new Response.ErrorListener() {
+                                                            @Override
+                                                            public void onErrorResponse(VolleyError error) {
+
+                                                            }
+                                                        });
+                                                        Mysingleton.getInstance(MainActivity.this).addToRequestqueue(str);
+
+                                                    } catch (UnsupportedEncodingException e) {
+                                                        e.printStackTrace();
+                                                    }
+
+
+                                                    Intent intent = new Intent(MainActivity.this, HomeActivity.class);
+
+                                                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                                    startActivity(intent);
+                                                    finish();
+                                                    //overridePendingTransition(R.anim.still,R.anim.slide_in_up);
+                                                }
+                                            }
+                                        });
+                            }
+                        } else {
+
+
+                            try {
+                                String encode = URLEncoder.encode(password,"UTF-8");
+
+                                StringRequest str = new StringRequest(Request.Method.POST, crypt + encode, new Response.Listener<String>() {
+                                    @Override
+                                    public void onResponse(String response) {
+                                        Map<String,Object> map = new HashMap<>();
+                                        map.put("sid",sid);
+                                        map.put("pass",response);
+                                        db.collection("users").document(auth.getCurrentUser().getUid())
+                                                .set(map);
+
+                                    }
+                                }, new Response.ErrorListener() {
+                                    @Override
+                                    public void onErrorResponse(VolleyError error) {
+
+                                    }
+                                });
+                                Mysingleton.getInstance(MainActivity.this).addToRequestqueue(str);
+                            } catch (UnsupportedEncodingException e) {
+                                e.printStackTrace();
+                            }
+
+
+
+                            Intent intent = new Intent(MainActivity.this, HomeActivity.class);
+
+                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                            startActivity(intent);
+                            finish();
+                            //overridePendingTransition(R.anim.still,R.anim.slide_in_up);
+
+
+
+
+                        }
+                    }
+                });
+
+    }
 
     private void loginrequest(final String magictoken, final String reurl) {
         sid = inputEmail.getText().toString();
@@ -189,15 +299,27 @@ public class MainActivity extends AppCompatActivity {
            @Override
            public void onResponse(String response) {
                System.out.println( "redirected success: " + response);
-               new Keepalive(){
+               Keepalive keepalive = new Keepalive(){
+                   @Override
+                   protected void onPostExecute(URL url) {
+                       super.onPostExecute(url);
+                       String reurl = String.valueOf(url);
+                       if(reurl.contains("keepalive")){
+                           System.out.println( "redirected login success: " + "continue");
 
+                       }
+                       else{
+                           System.out.println( "redirected login error: " + "auth failed");
+                       }
+                   }
                };
-               new Keepalive().execute();
+               keepalive.execute();
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
                 System.out.println( "redirected error: " + error.getMessage() );
+
             }
         }){
             @Override
@@ -221,167 +343,7 @@ public class MainActivity extends AppCompatActivity {
             }
         };
         queue.add(sr);
-//        JSONObject jsonObject = new JSONObject();
-//        try {
-//            jsonObject.put("magic",magictoken);
-//            jsonObject.put("username","B516008");
-//            jsonObject.put("password","anmol@2805");
-//            jsonObject.put("4Tredir","http://14.139.198.171/api/hibi");
-//        } catch (JSONException e) {
-//            e.printStackTrace();
-//        }
-//        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, "http://172.16.1.11:1000/", null, new Response.Listener<JSONObject>() {
-//            @Override
-//            public void onResponse(JSONObject response) {
-//
-//            }
-//        }, new Response.ErrorListener() {
-//            @Override
-//            public void onErrorResponse(VolleyError error) {
-//                System.out.println( "request error: " +magictoken + reurl + error.getMessage() );
-//
-//            }
-//        }){
-//            @Override
-//            public Map<String, String> getHeaders() throws AuthFailureError {
-//                Map<String, String> headers = new HashMap<String, String>();
-//                headers.put("cache-control", "no-cache");
-//                headers.put("content-type", "application/x-www-form-urlencoded");
-//                return headers;
-//            }
-//
-//            @Override
-//            public String getBodyContentType() {
-//                return "application/x-www-form-urlencoded; charset=UTF-8";
-//
-//            }
-//
-//            @Override
-//            protected Map<String, String> getParams() throws AuthFailureError {
-//                Map<String,String> params = new HashMap<>();
-//                params.put("magic",magictoken);
-//                params.put("username","B516008");
-//                params.put("password","anmol@2805");
-//                params.put("4Tredir","http://14.139.198.171/api/hibi");
-//                return params;
-//            }
-//
-//        };
-       // Mysingleton.getInstance(MainActivity.this).addToRequestqueue(jsonObjectRequest);
-//                        progressBar.setVisibility(View.VISIBLE);
-//                        auth.signInWithEmailAndPassword(email, password)
-//                                .addOnCompleteListener(MainActivity.this, new OnCompleteListener<AuthResult>() {
-//                                    @Override
-//                                    public void onComplete(@NonNull Task<AuthResult> task) {
-//                                        // If sign in fails, display a message to the user. If sign in succeeds
-//                                        // the auth state listener will be notified and logic to handle the
-//                                        // signed in user can be handled in the listener.
-//                                        progressBar.setVisibility(View.INVISIBLE);
-//                                        if (!task.isSuccessful()) {
-//                                            // there was an error
-//                                            if (password.length() < 6) {
-//                                                //inputPassword.setError(getString(R.string.minimum_password));
-//                                            } else {
-//
-//                                                auth.createUserWithEmailAndPassword(email, password)
-//                                                        .addOnCompleteListener(MainActivity.this, new OnCompleteListener<AuthResult>() {
-//                                                            @Override
-//                                                            public void onComplete(@NonNull Task<AuthResult> task) {
-//
-//                                                                progressBar.setVisibility(View.INVISIBLE);
-//                                                                // If sign in fails, display a message to the user. If sign in succeeds
-//                                                                // the auth state listener will be notified and logic to handle the
-//                                                                // signed in user can be handled in the listener.
-//                                                                if (!task.isSuccessful()) {
-//                                                                    Toast.makeText(MainActivity.this, "Authentication failed.Check your Network Connection",
-//                                                                            Toast.LENGTH_SHORT).show();
-//                                                                } else {
-//
-//                                                                    try {
-//                                                                        String encode  = URLEncoder.encode(password,"UTF-8");
-//                                                                        StringRequest str = new StringRequest(Request.Method.POST, crypt + encode, new Response.Listener<String>() {
-//                                                                            @Override
-//                                                                            public void onResponse(String response) {
-//                                                                                Map<String,Object> map = new HashMap<>();
-//                                                                                map.put("sid",sid);
-//                                                                                map.put("pass",response);
-//                                                                                map.put("enablenotif",enablenotif);
-//                                                                                map.put("remainconnect",remainconnect);
-//                                                                                map.put("autoconnect",autoconnect);
-//                                                                                db.collection("users").document(auth.getCurrentUser().getUid())
-//                                                                                        .set(map);
-//
-//                                                                            }
-//                                                                        }, new Response.ErrorListener() {
-//                                                                            @Override
-//                                                                            public void onErrorResponse(VolleyError error) {
-//
-//                                                                            }
-//                                                                        });
-//                                                                        Mysingleton.getInstance(MainActivity.this).addToRequestqueue(str);
-//
-//                                                                    } catch (UnsupportedEncodingException e) {
-//                                                                        e.printStackTrace();
-//                                                                    }
-//
-//
-//                                                                    Intent intent = new Intent(MainActivity.this, HomeActivity.class);
-//
-//                                                                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//                                                                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-//                                                                    startActivity(intent);
-//                                                                    finish();
-//                                                                    //overridePendingTransition(R.anim.still,R.anim.slide_in_up);
-//                                                                }
-//                                                            }
-//                                                        });
-//                                            }
-//                                        } else {
-//
-//
-//                                            try {
-//                                                String encode = URLEncoder.encode(password,"UTF-8");
-//
-//                                                StringRequest str = new StringRequest(Request.Method.POST, crypt + encode, new Response.Listener<String>() {
-//                                                    @Override
-//                                                    public void onResponse(String response) {
-//                                                        Map<String,Object> map = new HashMap<>();
-//                                                        map.put("sid",sid);
-//                                                        map.put("pass",response);
-//                                                        map.put("enablenotif",enablenotif);
-//                                                        map.put("remainconnect",remainconnect);
-//                                                        map.put("autoconnect",autoconnect);
-//                                                        db.collection("users").document(auth.getCurrentUser().getUid())
-//                                                                .set(map);
-//
-//                                                    }
-//                                                }, new Response.ErrorListener() {
-//                                                    @Override
-//                                                    public void onErrorResponse(VolleyError error) {
-//
-//                                                    }
-//                                                });
-//                                                Mysingleton.getInstance(MainActivity.this).addToRequestqueue(str);
-//                                            } catch (UnsupportedEncodingException e) {
-//                                                e.printStackTrace();
-//                                            }
-//
-//
-//
-//                                            Intent intent = new Intent(MainActivity.this, HomeActivity.class);
-//
-//                                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//                                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-//                                            startActivity(intent);
-//                                            finish();
-//                                            //overridePendingTransition(R.anim.still,R.anim.slide_in_up);
-//
-//
-//
-//
-//                                        }
-//                                    }
-//                                });
+
 
 
     }
@@ -503,6 +465,8 @@ public class MainActivity extends AppCompatActivity {
         itsrequest.execute();
         return tokenstatus[0];
     }
+
+
 
 
 
