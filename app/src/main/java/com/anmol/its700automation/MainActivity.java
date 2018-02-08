@@ -3,6 +3,7 @@ package com.anmol.its700automation;
 import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
+import android.net.Uri;
 import android.net.wifi.SupplicantState;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
@@ -22,10 +23,12 @@ import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
+import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.google.android.gms.maps.StreetViewPanoramaFragment;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -157,7 +160,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 else{
                     String magictoken = reurl.substring(reurl.lastIndexOf("?")+1);
-                    loginrequest(magictoken);
+                    loginrequest(magictoken,reurl);
                 }
 
 
@@ -166,7 +169,7 @@ public class MainActivity extends AppCompatActivity {
         itsrequest.execute();
     }
 
-    private void loginrequest(final String magictoken) {
+    private void loginrequest(final String magictoken, final String reurl) {
         sid = inputEmail.getText().toString();
         sid = sid.toLowerCase();
         email = sid + "@iiit-bh.ac.in";
@@ -181,36 +184,90 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(getApplicationContext(), "Enter password!", Toast.LENGTH_SHORT).show();
             return;
         }
-        JSONObject jsonObject = new JSONObject();
-        try {
-            jsonObject.put("magic",magictoken);
-            jsonObject.put("username",sid.toUpperCase());
-            jsonObject.put("password",password);
-            jsonObject.put("4Tredir","testing");
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, "http://172.16.1.11:1000/", jsonObject, new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject response) {
+        RequestQueue queue = Volley.newRequestQueue(MainActivity.this);
+        StringRequest sr = new StringRequest(Request.Method.POST,"http://172.16.1.11:1000/", new Response.Listener<String>() {
+           @Override
+           public void onResponse(String response) {
+               System.out.println( "redirected success: " + response);
+               new Keepalive(){
 
+               };
+               new Keepalive().execute();
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Toast.makeText(MainActivity.this,magictoken,Toast.LENGTH_SHORT).show();
+                System.out.println( "redirected error: " + error.getMessage() );
             }
         }){
             @Override
-            public Map<String, String> getHeaders() throws AuthFailureError {
-                Map<String, String> params = new HashMap<String, String>();
-                params.put("cache-control", "no-cache");
-                params.put("content-type", "application/x-www-form-urlencoded");
+            protected Map<String,String> getParams(){
+                Map<String,String> params = new HashMap<String, String>();
+                params.put("magic",magictoken);
+                params.put("username",sid.toUpperCase());
+                params.put("password",password);
+                params.put("4Tredir","http://14.139.198.171/api/hibi");
+
 
                 return params;
             }
+
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String,String> params = new HashMap<String, String>();
+                params.put("Content-Type","application/x-www-form-urlencoded");
+                params.put("Cache-Control","no-cache");
+                return params;
+            }
         };
-        Mysingleton.getInstance(MainActivity.this).addToRequestqueue(jsonObjectRequest);
+        queue.add(sr);
+//        JSONObject jsonObject = new JSONObject();
+//        try {
+//            jsonObject.put("magic",magictoken);
+//            jsonObject.put("username","B516008");
+//            jsonObject.put("password","anmol@2805");
+//            jsonObject.put("4Tredir","http://14.139.198.171/api/hibi");
+//        } catch (JSONException e) {
+//            e.printStackTrace();
+//        }
+//        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, "http://172.16.1.11:1000/", null, new Response.Listener<JSONObject>() {
+//            @Override
+//            public void onResponse(JSONObject response) {
+//
+//            }
+//        }, new Response.ErrorListener() {
+//            @Override
+//            public void onErrorResponse(VolleyError error) {
+//                System.out.println( "request error: " +magictoken + reurl + error.getMessage() );
+//
+//            }
+//        }){
+//            @Override
+//            public Map<String, String> getHeaders() throws AuthFailureError {
+//                Map<String, String> headers = new HashMap<String, String>();
+//                headers.put("cache-control", "no-cache");
+//                headers.put("content-type", "application/x-www-form-urlencoded");
+//                return headers;
+//            }
+//
+//            @Override
+//            public String getBodyContentType() {
+//                return "application/x-www-form-urlencoded; charset=UTF-8";
+//
+//            }
+//
+//            @Override
+//            protected Map<String, String> getParams() throws AuthFailureError {
+//                Map<String,String> params = new HashMap<>();
+//                params.put("magic",magictoken);
+//                params.put("username","B516008");
+//                params.put("password","anmol@2805");
+//                params.put("4Tredir","http://14.139.198.171/api/hibi");
+//                return params;
+//            }
+//
+//        };
+       // Mysingleton.getInstance(MainActivity.this).addToRequestqueue(jsonObjectRequest);
 //                        progressBar.setVisibility(View.VISIBLE);
 //                        auth.signInWithEmailAndPassword(email, password)
 //                                .addOnCompleteListener(MainActivity.this, new OnCompleteListener<AuthResult>() {
@@ -384,7 +441,27 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public static class Keepalive extends AsyncTask<Void,Void,URL>{
+        @Override
+        protected URL doInBackground(Void... voids) {
+            URLConnection con = null;
+            try {
+                con = new URL( "http://172.16.1.11:1000/keepalive?03000f090a0d0d26" ).openConnection();
+                System.out.println( "orignal url: " + con.getURL() );
+                con.connect();
+                System.out.println( "connected url: " + con.getURL() );
+                InputStream is = con.getInputStream();
+                System.out.println( "redirected url: " + con.getURL() );
+                is.close();
+                return con.getURL();
+            } catch (IOException e) {
+                e.printStackTrace();
 
+
+            }
+            return null;
+        }
+    }
     public Boolean isWifiConnected() {
         Boolean networkstatus = false;
         final ConnectivityManager connMgr = (ConnectivityManager)
@@ -426,6 +503,7 @@ public class MainActivity extends AppCompatActivity {
         itsrequest.execute();
         return tokenstatus[0];
     }
+
 
 
 
